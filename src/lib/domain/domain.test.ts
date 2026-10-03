@@ -75,3 +75,21 @@ describe("importador", () => {
     expect(() => parseChecklistRows([["a", "b"]])).toThrow(/Partidas a controlar/);
   });
 });
+
+import { leavesNoAdmin } from "./members";
+
+describe("miembros", () => {
+  const members = [
+    { userId: "a", isAdmin: true },
+    { userId: "b", isAdmin: false },
+  ];
+  it("no permite quitar ni degradar al último administrador", () => {
+    expect(leavesNoAdmin(members, "a", { remove: true })).toBe(true);
+    expect(leavesNoAdmin(members, "a", { isAdmin: false })).toBe(true);
+  });
+  it("permite cambios que dejan algún administrador", () => {
+    expect(leavesNoAdmin(members, "b", { remove: true })).toBe(false);
+    expect(leavesNoAdmin(members, "a", { isAdmin: true })).toBe(false);
+    expect(leavesNoAdmin([...members, { userId: "c", isAdmin: true }], "a", { remove: true })).toBe(false);
+  });
+});

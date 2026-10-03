@@ -28,6 +28,7 @@ export default async function AppHome() {
           );
         })}
       </ul>
+      <p><a href="/app/users">Gestionar usuarios</a></p>
       <form action={logout}><button type="submit">Cerrar sesión</button></form>
     </main>
   );
