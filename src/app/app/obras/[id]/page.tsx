@@ -57,6 +57,7 @@ export default async function Obra({ params, searchParams }: { params: Promise<{
                 <td>{p.code && <span className="badge">{p.code}</span>} <a href={`/app/obras/${id}/partidas/${p.id}`}>{p.name}</a></td>
                 <td><span className="badge">{(p.partida_items as unknown as { count: number }[])[0]?.count ?? 0}</span></td>
                 <td><div className="row-actions">
+                  <a className="btn small" href={`/app/obras/${id}/partidas/${p.id}/registros`}>Abrir protocolo</a>
                   <a className="btn small secondary" style={{ color: "var(--ink)", background: "#fff", border: "1px solid #d0d5dd" }} href={`/app/obras/${id}/partidas/${p.id}`}>{isAdmin ? "Editar" : "Ver"}</a>
                   {isAdmin && (
                     <form action={deletePartida}>

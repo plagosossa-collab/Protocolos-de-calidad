@@ -23,6 +23,7 @@ export default async function PartidaPage({ params, searchParams }: { params: Pr
       <p className="crumbs"><a href="/app/obras">Obras</a> / <a href={`/app/obras/${id}`}>{projectName}</a> / {partida.name}</p>
       <div className="page-head"><h1>{partida.code && <span className="badge" style={{ marginRight: 8, verticalAlign: "middle" }}>{partida.code}</span>}{partida.name}</h1>{partida.title && <p className="muted">{partida.title}</p>}</div>
       <Flash ok={ok} error={error} />
+      <p><a className="btn" href={`/app/obras/${id}/partidas/${pid}/registros`}>Abrir protocolo en terreno</a></p>
 
       <section className="card">
         <h2>Cargos de firma, en orden de revisión</h2>

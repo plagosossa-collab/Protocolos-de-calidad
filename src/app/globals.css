@@ -76,3 +76,42 @@ tr:last-child td { border-bottom: 0; }
 .auth-card button[type="submit"] { width: 100%; padding: 0.7rem; }
 .auth-sub { color: var(--muted); margin: 0 0 1.25rem; }
 @media (max-width: 640px) { .who span { display: none; } }
+
+/* Tablero de deptos y checklist en terreno */
+.tabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.tab { padding: 0.4rem 0.9rem; border-radius: 999px; background: #fff; border: 1px solid var(--line); text-decoration: none; color: var(--ink); font-weight: 600; }
+.tab.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: middle; }
+.unit-grid { display: grid; gap: 0.35rem; align-items: center; overflow-x: auto; }
+.floor { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+.cell { padding: 0.55rem 0.2rem; font-size: 0.82rem; border-radius: 8px; border: 1px solid transparent; }
+.st-none { background: #eef0f3; color: #475467; }
+.st-progress { background: #fef0c7; color: #7a4b00; }
+.st-rejected { background: #fee4e2; color: #912018; }
+.st-resolved { background: #d1fadf; color: #05603a; }
+.st-closed { background: #1a7f37; color: #fff; }
+.cell.st-none, .cell.st-progress, .cell.st-rejected, .cell.st-resolved, .cell.st-closed { font-weight: 600; }
+.dot.st-none { background: #cfd4dc; } .dot.st-progress { background: #f7c948; } .dot.st-rejected { background: #f04438; }
+.dot.st-resolved { background: #47cd89; } .dot.st-closed { background: #1a7f37; }
+.pill { padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+.item-head { display: flex; flex-direction: column; margin-bottom: 0.6rem; }
+.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 0.35rem; margin-bottom: 0.5rem; }
+.seg-btn { background: #fff; color: var(--ink); border: 1px solid #d0d5dd; padding: 0.55rem 0.3rem; }
+.seg-btn:disabled { cursor: default; opacity: 0.55; }
+.seg-btn.on.st-accepted { background: #1a7f37; color: #fff; border-color: #1a7f37; }
+.seg-btn.on.st-pending { background: #f7c948; color: #4a3200; border-color: #f7c948; }
+.seg-btn.on.st-rejected { background: #d92d20; color: #fff; border-color: #d92d20; }
+.seg-btn.on.st-not_applicable { background: #667085; color: #fff; border-color: #667085; }
+.item textarea { margin-bottom: 0.5rem; resize: vertical; }
+.thumbs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.thumbs img { height: 72px; width: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.history { margin-top: 0.6rem; font-size: 0.85rem; }
+.history summary { cursor: pointer; color: var(--muted); }
+.history ul { margin: 0.4rem 0 0; padding-left: 1.1rem; }
+.signers { padding-left: 1.2rem; }
+.signers li { margin: 0.45rem 0; }
+.signers li.done::marker { color: var(--ok); content: "✓ "; }
+.signers li.turn { font-weight: 600; }
+.sig-img { height: 36px; vertical-align: middle; background: #fff; border: 1px solid var(--line); border-radius: 4px; }
+.sigpad canvas { width: 100%; height: 170px; background: #fff; border: 2px dashed #b8c0cc; border-radius: 10px; touch-action: none; display: block; margin-bottom: 0.4rem; }

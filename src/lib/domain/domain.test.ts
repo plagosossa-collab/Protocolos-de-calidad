@@ -141,3 +141,29 @@ describe("importador de la versión anterior", () => {
     expect(() => parseLegacyStorage([["config:project", "{"], ["config:partidas", "[]"]])).toThrow(/formato/);
   });
 });
+
+import { cellState, cargoKey, nextSigner, unitLabel } from "./protocol";
+
+describe("protocolo en terreno", () => {
+  const roles = ["SUPERVISOR", "JEFE DE TERRENO", "ITO"];
+  it("numera los deptos como en obra", () => {
+    expect(unitLabel(9, 4)).toBe("904");
+    expect(unitLabel(11, 8)).toBe("1108");
+    expect(unitLabel(1, 1)).toBe("101");
+  });
+  it("compara cargos sin importar espacios ni mayúsculas", () => {
+    expect(cargoKey(" Supervisor  Subcontrato ")).toBe("SUPERVISOR SUBCONTRATO");
+  });
+  it("calcula el estado del registro", () => {
+    expect(cellState(null, roles, [])).toBe("none");
+    expect(cellState([{ status: "pending" }], roles, [])).toBe("progress");
+    expect(cellState([{ status: "accepted" }, { status: "rejected" }], roles, [])).toBe("rejected");
+    expect(cellState([{ status: "accepted" }, { status: "not_applicable" }], roles, ["SUPERVISOR"])).toBe("resolved");
+    expect(cellState([{ status: "rejected" }], roles, ["ito"])).toBe("closed");
+  });
+  it("indica quién firma ahora", () => {
+    expect(nextSigner(roles, [])).toBe("SUPERVISOR");
+    expect(nextSigner(roles, ["supervisor", "JEFE DE TERRENO"])).toBe("ITO");
+    expect(nextSigner(roles, roles)).toBeNull();
+  });
+});
