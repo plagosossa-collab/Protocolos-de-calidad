@@ -11,7 +11,7 @@ export default async function Obra({ params, searchParams }: { params: Promise<{
   if (!project) notFound();
   const [{ data: buildings }, { data: partidas }] = await Promise.all([
     supabase.from("buildings").select("id, name, floors, units_per_floor").eq("project_id", id).order("name"),
-    supabase.from("partidas").select("id, name, partida_items(count)").eq("project_id", id).order("name"),
+    supabase.from("partidas").select("id, name, code, partida_items(count)").eq("project_id", id).order("name"),
   ]);
 
   return (
@@ -54,7 +54,7 @@ export default async function Obra({ params, searchParams }: { params: Promise<{
             <thead><tr><th>Partida</th><th>Ítems</th><th /></tr></thead>
             <tbody>{partidas.map((p) => (
               <tr key={p.id}>
-                <td><a href={`/app/obras/${id}/partidas/${p.id}`}>{p.name}</a></td>
+                <td>{p.code && <span className="badge">{p.code}</span>} <a href={`/app/obras/${id}/partidas/${p.id}`}>{p.name}</a></td>
                 <td><span className="badge">{(p.partida_items as unknown as { count: number }[])[0]?.count ?? 0}</span></td>
                 <td><div className="row-actions">
                   <a className="btn small secondary" style={{ color: "var(--ink)", background: "#fff", border: "1px solid #d0d5dd" }} href={`/app/obras/${id}/partidas/${p.id}`}>{isAdmin ? "Editar" : "Ver"}</a>
@@ -69,7 +69,7 @@ export default async function Obra({ params, searchParams }: { params: Promise<{
         {isAdmin && (
           <form action={addPartida} style={{ marginTop: "1rem" }}>
             <input type="hidden" name="project_id" value={id} />
-            <div className="form-grid"><label>Nueva partida<input name="name" required placeholder="Tabiquería" /></label><button type="submit">Crear partida</button></div>
+            <div className="form-grid"><label>Nueva partida<input name="name" required placeholder="Tabiquería" /></label><label>Código (opcional)<input name="code" placeholder="TM-08" /></label><label>Título del protocolo (opcional)<input name="title" placeholder="PROTOCOLO TABIQUERIA" /></label><button type="submit">Crear partida</button></div>
           </form>
         )}
       </section>

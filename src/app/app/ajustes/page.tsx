@@ -24,6 +24,11 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
         {logoUrl && <p><img src={logoUrl} alt="Logo actual" style={{ maxHeight: 80, maxWidth: 240 }} /></p>}
         <small>El logo aparece en la barra superior y como marca de agua tenue al fondo de la app.</small>
       </section>
+      <section className="card">
+        <h2>Datos de la versión anterior</h2>
+        <p className="muted">Trae la obra, los edificios y las partidas desde la planilla de Google Sheets.</p>
+        <a className="btn" href="/app/ajustes/importar">Importar planilla</a>
+      </section>
     </>
   );
 }

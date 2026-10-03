@@ -9,7 +9,7 @@ const COMMON = ["Supervisor Subcontrato", "Supervisor", "Jefe de Terreno", "Cont
 export default async function PartidaPage({ params, searchParams }: { params: Promise<{ id: string; pid: string }>; searchParams: Promise<{ ok?: string; error?: string }> }) {
   const [{ id, pid }, { ok, error }] = await Promise.all([params, searchParams]);
   const { supabase, isAdmin } = await getContext();
-  const { data: partida } = await supabase.from("partidas").select("id, name, project_id, projects(name)").eq("id", pid).eq("project_id", id).maybeSingle();
+  const { data: partida } = await supabase.from("partidas").select("id, name, code, title, project_id, projects(name)").eq("id", pid).eq("project_id", id).maybeSingle();
   if (!partida) notFound();
   const [{ data: roles }, { data: items }] = await Promise.all([
     supabase.from("partida_roles").select("cargo, cc_on_notice").eq("partida_id", pid).order("position"),
@@ -21,7 +21,7 @@ export default async function PartidaPage({ params, searchParams }: { params: Pr
   return (
     <>
       <p className="crumbs"><a href="/app/obras">Obras</a> / <a href={`/app/obras/${id}`}>{projectName}</a> / {partida.name}</p>
-      <div className="page-head"><h1>{partida.name}</h1></div>
+      <div className="page-head"><h1>{partida.code && <span className="badge" style={{ marginRight: 8, verticalAlign: "middle" }}>{partida.code}</span>}{partida.name}</h1>{partida.title && <p className="muted">{partida.title}</p>}</div>
       <Flash ok={ok} error={error} />
 
       <section className="card">

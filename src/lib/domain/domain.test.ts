@@ -107,3 +107,37 @@ describe("marca", () => {
     expect(inkOn("#ffe066")).toBe("#111827");
   });
 });
+
+import { parseLegacyStorage, withCc, normCargo } from "./legacy";
+
+describe("importador de la versión anterior", () => {
+  const project = JSON.stringify({
+    obra: "Obra Demo",
+    edificios: [{ id: "a", nombre: "Torre A", pisos: 11, deptosPorPiso: 8 }],
+    usuarios: [{ usuario: "x", passwordHash: "secreto" }],
+  });
+  const partidas = JSON.stringify([
+    { codigo: "TM-02", nombre: "Trazado", titulo: "PROTOCOLO X", roles: ["SUPERVISOR  SUBCONTRATO", "JEFE DE TERRENO", "CONTROL DE CALIDAD", "ITO"],
+      items: [{ id: "TM-02-01", texto: "VERIFICAR", doc: "Planos", equipo: "Huincha" }, { id: "TM-02-02", texto: "" }] },
+  ]);
+
+  it("extrae obra, edificios y partidas sin usuarios ni hashes", () => {
+    const cfg = parseLegacyStorage([["config:project", project], ["config:partidas", partidas], ["registro:TM-02:a:101", "{}"]]);
+    expect(cfg.obra).toBe("Obra Demo");
+    expect(cfg.buildings).toEqual([{ name: "Torre A", floors: 11, unitsPerFloor: 8 }]);
+    expect(cfg.partidas[0].items).toEqual([{ code: "TM-02-01", description: "VERIFICAR", document: "Planos", team: "Huincha" }]);
+    expect(cfg.recordCount).toBe(1);
+    expect(JSON.stringify(cfg)).not.toContain("secreto");
+  });
+
+  it("normaliza cargos y pone en copia a Jefe de Terreno y Control de Calidad (salvo el último)", () => {
+    expect(normCargo("SUPERVISOR  SUBCONTRATO ")).toBe("SUPERVISOR SUBCONTRATO");
+    expect(withCc(["SUPERVISOR  X", "JEFE DE TERRENO", "CONTROL DE CALIDAD", "ITO"]).map((r) => r.cc)).toEqual([false, true, true, false]);
+    expect(withCc(["JEFE DE TERRENO"])[0].cc).toBe(false);
+  });
+
+  it("falla con mensajes claros", () => {
+    expect(() => parseLegacyStorage([])).toThrow(/config:project/);
+    expect(() => parseLegacyStorage([["config:project", "{"], ["config:partidas", "[]"]])).toThrow(/formato/);
+  });
+});

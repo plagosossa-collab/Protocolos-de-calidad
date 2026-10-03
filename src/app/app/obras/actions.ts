@@ -52,7 +52,9 @@ export async function addPartida(formData: FormData) {
   const path = `/app/obras/${pid}`;
   const name = str(formData, "name");
   if (!name) flash(path, "error", "El nombre de la partida es obligatorio");
-  const { data, error } = await supabase.from("partidas").insert({ company_id: company.id, project_id: pid, name }).select("id").single();
+  const { data, error } = await supabase.from("partidas")
+    .insert({ company_id: company.id, project_id: pid, name, code: str(formData, "code") || null, title: str(formData, "title") || null })
+    .select("id").single();
   if (error || !data) flash(path, "error", "No se pudo crear la partida");
   revalidatePath(path);
   flash(`${path}/partidas/${data!.id}`, "ok", "Partida creada. Define ahora sus cargos de firma e ítems.");
