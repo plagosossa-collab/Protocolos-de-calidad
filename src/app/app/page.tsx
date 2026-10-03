@@ -1,35 +1,22 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { logout } from "../login/actions";
+import { getContext } from "@/lib/context";
 
 export default async function AppHome() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: memberships } = await supabase
-    .from("memberships")
-    .select("is_admin, fixed_cargo, companies(id, name)")
-    .eq("user_id", user.id);
-
-  if (!memberships?.length) redirect("/onboarding");
-
+  const { supabase, company, isAdmin, cargo } = await getContext();
+  const [{ count: obras }, { count: miembros }] = await Promise.all([
+    supabase.from("projects").select("id", { count: "exact", head: true }),
+    supabase.from("memberships").select("user_id", { count: "exact", head: true }).eq("company_id", company.id),
+  ]);
   return (
-    <main style={{ maxWidth: 640, margin: "4rem auto", padding: "0 1rem" }}>
-      <h1>Protocolos de Calidad</h1>
-      <p>Sesión iniciada como {user.email}</p>
-      <ul>
-        {memberships.map((m) => {
-          const company = m.companies as unknown as { id: string; name: string };
-          return (
-            <li key={company.id}>
-              {company.name}{m.is_admin ? " · administrador" : ""}{m.fixed_cargo ? ` · ${m.fixed_cargo}` : ""}
-            </li>
-          );
-        })}
-      </ul>
-      <p><a href="/app/users">Gestionar usuarios</a></p>
-      <form action={logout}><button type="submit">Cerrar sesión</button></form>
-    </main>
+    <>
+      <div className="page-head">
+        <h1>Bienvenido</h1>
+        <p className="muted">{company.name}{cargo ? ` · ${cargo}` : ""}{isAdmin ? " · administrador" : ""}</p>
+      </div>
+      <div className="grid">
+        <a className="tile" href="/app/obras"><strong>Obras</strong><span className="muted">{obras ?? 0} registradas · edificios y partidas</span></a>
+        <a className="tile" href="/app/users"><strong>Usuarios</strong><span className="muted">{miembros ?? 0} personas · cargos y accesos</span></a>
+        {isAdmin && <a className="tile" href="/app/ajustes"><strong>Ajustes</strong><span className="muted">Logo y color de la empresa</span></a>}
+      </div>
+    </>
   );
 }

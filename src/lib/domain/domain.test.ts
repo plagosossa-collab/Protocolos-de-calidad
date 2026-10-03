@@ -93,3 +93,17 @@ describe("miembros", () => {
     expect(leavesNoAdmin([...members, { userId: "c", isAdmin: true }], "a", { remove: true })).toBe(false);
   });
 });
+
+import { inkOn, safeBrand, DEFAULT_BRAND } from "../brand";
+
+describe("marca", () => {
+  it("valida el color y cae al predeterminado", () => {
+    expect(safeBrand("#ff0000")).toBe("#ff0000");
+    expect(safeBrand("red; background:url(x)")).toBe(DEFAULT_BRAND);
+    expect(safeBrand(null)).toBe(DEFAULT_BRAND);
+  });
+  it("elige texto legible", () => {
+    expect(inkOn("#1f4e79")).toBe("#ffffff");
+    expect(inkOn("#ffe066")).toBe("#111827");
+  });
+});
