@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -32,22 +33,49 @@ export async function inviteMember(formData: FormData) {
   const { supabase } = await requireAdmin(companyId);
   const admin = createAdminClient();
 
-  let userId: string | null = (await admin.rpc("user_id_by_email", { p_email: email })).data;
-  let invited = false;
-  if (!userId) {
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { data: { full_name: fullName } });
-    if (error || !data?.user) return back("error", `No se pudo enviar la invitación: ${error?.message ?? "error desconocido"}`);
-    userId = data.user.id;
-    invited = true;
+  // La invitación no depende del correo de Supabase: se genera un enlace de un solo
+  // uso que el administrador comparte (p. ej. por WhatsApp).
+  const existing = (await admin.rpc("user_by_email", { p_email: email })).data?.[0] as
+    | { id: string; pending_invite: boolean } | undefined;
+  let userId: string | undefined = existing?.id;
+  let linkType: "invite" | "recovery" | null = null;
+  if (!existing) {
+    linkType = "invite";
+  } else {
+    // Invitada antes y nunca entró: se le genera un enlace nuevo.
+    if (existing.pending_invite) linkType = "recovery";
   }
 
+  let link: string | null = null;
+  if (linkType) {
+    const { data, error } = await admin.auth.admin.generateLink(
+      linkType === "invite"
+        ? { type: "invite", email, options: { data: { full_name: fullName } } }
+        : { type: "recovery", email },
+    );
+    if (error || !data?.user || !data.properties?.hashed_token) {
+      return back("error", `No se pudo crear la invitación: ${error?.message ?? "error desconocido"}`);
+    }
+    userId = data.user.id;
+    const h = await headers();
+    const host = h.get("x-forwarded-host") ?? h.get("host");
+    const proto = h.get("x-forwarded-proto") ?? "https";
+    link = `${proto}://${host}/auth/confirm?token_hash=${data.properties.hashed_token}&type=${linkType}&next=/set-password`;
+  }
+
+  if (!userId) return back("error", "No se pudo identificar a la persona");
   const { error } = await supabase.from("memberships").insert({
     company_id: companyId, user_id: userId, is_admin: isAdmin, fixed_cargo: cargo, notify_email: email,
   });
-  if (error) back("error", error.code === "23505" ? "Esa persona ya pertenece a la empresa" : "No se pudo agregar a la empresa");
+  const alreadyMember = error?.code === "23505";
+  // Si ya era miembro pero nunca entró, igual se entrega el enlace nuevo.
+  if (error && !(alreadyMember && link)) {
+    back("error", alreadyMember ? "Esa persona ya pertenece a la empresa" : "No se pudo agregar a la empresa");
+  }
 
   revalidatePath("/app/users");
-  back("ok", invited ? `Invitación enviada a ${email}` : `${email} ya tenía cuenta y fue agregado a la empresa`);
+  if (link) redirect(`/app/users?ok=${encodeURIComponent(`Invitación creada para ${email}`)}&link=${encodeURIComponent(link)}`);
+  back("ok", `${email} ya tenía cuenta y fue agregado a la empresa`);
 }
 
 async function members(supabase: Awaited<ReturnType<typeof createClient>>, companyId: string) {

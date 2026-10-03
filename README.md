@@ -26,14 +26,9 @@ Aplicar también `supabase/migrations/0003_members.sql`.
 Variable de servidor (Vercel → Environment Variables, **sin** prefijo `NEXT_PUBLIC_`):
 `SUPABASE_SERVICE_ROLE_KEY` (clave secreta; nunca en GitHub ni en el navegador).
 
-En Supabase → Authentication → Email Templates → **Invite user**, usar este enlace
-(así la sesión se canjea en el servidor, en `/auth/confirm`):
+Al invitar, la app genera un **enlace de un solo uso** que el administrador comparte por el medio
+que prefiera (p. ej. WhatsApp); se canjea en `/auth/confirm` y lleva a `/set-password`.
+No requiere SMTP ni editar plantillas de Supabase (en el plan gratuito editarlas exige SMTP propio).
+Aplicar también `0004_user_lookup.sql`.
 
-```html
-<h2>Te invitaron a Protocolos de Calidad</h2>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/set-password">Aceptar invitación y definir contraseña</a></p>
-```
-
-`Site URL` (Authentication → URL Configuration) debe ser la dirección fija de la app.
-El correo integrado de Supabase tiene un límite muy bajo de envíos por hora: para uso real,
-configurar SMTP propio (p. ej. Resend) en Authentication → SMTP Settings.
+Más adelante, con un dominio propio, se podrá configurar SMTP (p. ej. Resend) para enviar el enlace por correo.
